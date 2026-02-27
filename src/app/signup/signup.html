@@ -1,0 +1,373 @@
+<div class="page-wrapper" [class.light]="!darkMode()">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <mat-icon class="brand-icon">sports_esports</mat-icon>
+      <span class="brand-name">NexusGG</span>
+    </div>
+    <div class="nav-live"><div class="live-dot"></div>LIVE</div><div class="nav-right">
+      <span class="theme-label">{{ darkMode() ? 'Dark' : 'Light' }}</span>
+      <mat-slide-toggle
+        [checked]="darkMode()"
+        (change)="toggleTheme()"
+        color="primary"
+        matTooltip="Toggle theme">
+      </mat-slide-toggle>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <mat-icon style="font-size:14px;width:14px;height:14px;">emoji_events</mat-icon>
+      Season 7 · Open Registration
+    </div>
+    <h1 class="hero-title">Join the <span class="gradient-text">Tournament</span></h1>
+    <p class="hero-sub">Register now to compete in the biggest esports event of the year. Limited slots available.</p>
+
+    <!-- Progress bar showing slots -->
+    <div class="slots-wrap">
+      <div class="slots-info">
+        <span><span class="slots-info-left">Slots filled</span></span>
+        <span class="slots-count"><strong>847</strong> / 1000</span>
+      </div>
+      <mat-progress-bar mode="determinate" value="84" color="primary"></mat-progress-bar>
+      <span class="slots-pct">⚡ 153 slots remaining — filling fast</span>
+    </div>
+  </div>
+
+  <!-- ===== FORM CARD ===== -->
+  <div class="form-container">
+    <form [formGroup]="form" (ngSubmit)="onSubmit(form.value)">
+
+      <!-- SECTION 1: Account -->
+      <div class="section">
+        <div class="section-label">
+          <mat-icon>manage_accounts</mat-icon>
+          Account Setup
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Gamer Tag</mat-label>
+          <mat-icon matPrefix class="field-icon">tag</mat-icon>
+          <input matInput placeholder="e.g. ShadowBlade99" formControlName="gamertag">
+          @if (form.get('gamertag')?.hasError('required') && form.get('gamertag')?.touched) {
+            <mat-error>Gamer tag is required.</mat-error>
+          }
+          @if (form.get('gamertag')?.hasError('minlength') && form.get('gamertag')?.touched) {
+            <mat-error>Must be at least 3 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <mat-icon matPrefix class="field-icon">alternate_email</mat-icon>
+          <input matInput placeholder="you@example.com" formControlName="email" type="email">
+          @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+            <mat-error>Email is required.</mat-error>
+          }
+          @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <mat-icon matPrefix class="field-icon">lock</mat-icon>
+          <input matInput [type]="hidePassword ? 'password' : 'text'"
+                 placeholder="Min. 8 alphanumeric chars, start with a letter"
+                 formControlName="password">
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+            <mat-icon class="field-icon">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+            <mat-error>Password is required.</mat-error>
+          }
+          @if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+            <mat-error>Password must be at least 8 characters.</mat-error>
+          }
+          @if (form.get('password')?.hasError('startsWithLetter') && form.get('password')?.touched) {
+            <mat-error>Password must start with a letter.</mat-error>
+          }
+          @if (form.get('password')?.hasError('alphanumericOnly') && form.get('password')?.touched) {
+            <mat-error>Only letters and numbers allowed (no special characters).</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Password Strength Bar (MatProgressBar — Extra #3) -->
+        @if (form.get('password')?.value) {
+          <div class="strength-wrap">
+            <div class="strength-header">
+              <span class="strength-label">Password Strength</span>
+              <span class="strength-value" [class]="'strength-' + passwordStrengthLabel.toLowerCase()">
+                {{ passwordStrengthLabel }}
+              </span>
+            </div>
+            <mat-progress-bar
+              [mode]="'determinate'"
+              [value]="passwordStrength"
+              [color]="passwordStrengthColor">
+            </mat-progress-bar>
+          </div>
+        }
+      </div>
+
+      <!-- SECTION 2: Personal Info -->
+      <div class="section">
+        <div class="section-label">
+          <mat-icon>person</mat-icon>
+          Personal Information
+        </div>
+
+        <span class="field-label">Gender</span>
+        <mat-radio-group formControlName="gender" class="radio-group">
+          <mat-radio-button value="male">Male</mat-radio-button>
+          <mat-radio-button value="female">Female</mat-radio-button>
+          <mat-radio-button value="nonbinary">Non-binary</mat-radio-button>
+          <mat-radio-button value="prefer_not">Prefer not to say</mat-radio-button>
+        </mat-radio-group>
+        @if (form.get('gender')?.invalid && submitted) {
+          <span class="custom-error">Please select your gender.</span>
+        }
+
+        <br>
+
+        <mat-form-field appearance="outline" class="full-width" style="margin-top:14px;">
+          <mat-label>Date of Birth</mat-label>
+          <mat-icon matPrefix class="field-icon">cake</mat-icon>
+          <input matInput [matDatepicker]="picker"
+                 [max]="maxDate"
+                 formControlName="birthDate"
+                 placeholder="MM/DD/YYYY" readonly>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"
+            matTooltip="Must be born in 2006 or earlier"></mat-datepicker-toggle>
+          <mat-datepicker #picker startView="multi-year"></mat-datepicker>
+          @if (form.get('birthDate')?.hasError('required') && submitted) {
+            <mat-error>Date of birth is required.</mat-error>
+          }
+          @if (form.get('birthDate')?.hasError('tooYoung')) {
+            <mat-error>You must be born in 2006 or earlier to register.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- SECTION 3: Game Info -->
+      <div class="section">
+        <div class="section-label">
+          <mat-icon>sports_esports</mat-icon>
+          Game Information
+        </div>
+
+        <!-- Game Select (MatSelect — Extra from prev) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Game Title</mat-label>
+          <mat-icon matPrefix class="field-icon">videogame_asset</mat-icon>
+          <mat-select formControlName="game" placeholder="Select your game">
+            @for (g of games; track g) {
+              <mat-option [value]="g">{{ g }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('game')?.hasError('required') && submitted) {
+            <mat-error>Please select a game.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="two-col">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Rank / Division</mat-label>
+            <mat-icon matPrefix class="field-icon">military_tech</mat-icon>
+            <mat-select formControlName="rank">
+              @for (r of ranks; track r) {
+                <mat-option [value]="r">{{ r }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('rank')?.hasError('required') && submitted) {
+              <mat-error>Select your rank.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Platform</mat-label>
+            <mat-icon matPrefix class="field-icon">devices</mat-icon>
+            <mat-select formControlName="platform">
+              @for (p of platforms; track p) {
+                <mat-option [value]="p">{{ p }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('platform')?.hasError('required') && submitted) {
+              <mat-error>Select platform.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Roles — MatChips -->
+        <span class="field-label">Preferred Role(s) <span class="optional">(optional)</span></span>
+        <mat-chip-set class="chip-set">
+          @for (role of roles; track role) {
+            <mat-chip
+              [class.chip-selected]="isRoleSelected(role)"
+              (click)="toggleRole(role)">
+              @if (isRoleSelected(role)) {
+                <mat-icon style="font-size:13px;width:13px;height:13px;margin-right:3px;">check</mat-icon>
+              }
+              {{ role }}
+            </mat-chip>
+          }
+        </mat-chip-set>
+
+        <!-- Skill Slider -->
+        <div class="slider-wrap" style="margin-top:18px;">
+          <div class="slider-header">
+            <span class="slider-title">Skill Level</span>
+            <span
+              class="skill-badge"
+              [matBadge]="form.get('skillLevel')?.value?.toString()"
+              matBadgePosition="above after"
+              matBadgeColor="primary">
+              &nbsp;&nbsp;&nbsp;&nbsp;
+            </span>
+            <span class="skill-label">{{ form.get('skillLevel')?.value }} / 10</span>
+          </div>
+          <mat-slider [min]="minSkill" [max]="maxSkill" step="1" color="primary" style="width:100%;">
+            <input matSliderThumb formControlName="skillLevel">
+          </mat-slider>
+          <div class="slider-range">
+            <span>Casual (1)</span>
+            <span>Pro (10)</span>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <mat-form-field appearance="outline" class="full-width" style="margin-top:18px;">
+          <mat-label>Player Bio <span style="font-size:12px;opacity:.6;">(optional)</span></mat-label>
+          <mat-icon matPrefix class="field-icon">edit_note</mat-icon>
+          <textarea matInput placeholder="Tell us about yourself as a player..."
+                    formControlName="bio" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- SECTION 4: Agreement -->
+      <div class="section">
+        <div class="section-label">
+          <mat-icon>gavel</mat-icon>
+          Tournament Rules
+        </div>
+
+        <div class="rules-list">
+          <div class="rule-item">
+            <mat-icon class="rule-icon">check_circle</mat-icon>
+            <span>No cheating, hacking, or exploiting game bugs</span>
+          </div>
+          <div class="rule-item">
+            <mat-icon class="rule-icon">check_circle</mat-icon>
+            <span>Respectful conduct toward all participants</span>
+          </div>
+          <div class="rule-item">
+            <mat-icon class="rule-icon">check_circle</mat-icon>
+            <span>Must be available during scheduled match times</span>
+          </div>
+        </div>
+
+        <div class="checkbox-wrap">
+          <mat-checkbox formControlName="agreeToTerms" color="primary">
+            I agree to the <a href="#" class="link">Tournament Rules</a>,
+            <a href="#" class="link">Code of Conduct</a>, and
+            <a href="#" class="link">Privacy Policy</a>
+          </mat-checkbox>
+        </div>
+        @if (form.get('agreeToTerms')?.invalid && submitted) {
+          <span class="custom-error">You must accept the rules to register.</span>
+        }
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="button-row">
+        <button mat-flat-button type="submit" class="submit-btn">
+          <mat-icon style="margin-right:8px;">emoji_events</mat-icon>
+          Register Now
+        </button>
+        <button mat-button type="button" class="reset-btn" (click)="onReset()">
+          <mat-icon style="margin-right:4px; font-size:16px;">refresh</mat-icon>
+          Reset
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ===== SUCCESS CARD ===== -->
+  @if (submitted && form.valid) {
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-icon-wrap">
+          <mat-icon>emoji_events</mat-icon>
+        </div>
+        <div>
+          <h2>You're In, <span class="gradient-text">{{ gamertag }}</span>!</h2>
+          <p>Registration confirmed. Check your email for match details.</p>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+      <br>
+
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="result-label">Gamer Tag</span>
+          <span class="result-value">{{ gamertag }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Email</span>
+          <span class="result-value">{{ email }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Gender</span>
+          <span class="result-value">{{ gender }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Date of Birth</span>
+          <span class="result-value">{{ birthDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Game</span>
+          <span class="result-value">{{ game }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Rank</span>
+          <span class="result-value">{{ rank }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Platform</span>
+          <span class="result-value">{{ platform }}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Skill Level</span>
+          <span class="result-value">{{ skillLevel }} / 10</span>
+        </div>
+        @if (selectedRoles.length > 0) {
+          <div class="result-item" style="grid-column: span 2;">
+            <span class="result-label">Preferred Roles</span>
+            <span class="result-value">{{ selectedRoles.join(', ') }}</span>
+          </div>
+        }
+        @if (bio) {
+          <div class="result-item" style="grid-column: span 2;">
+            <span class="result-label">Bio</span>
+            <span class="result-value">{{ bio }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ===== ERROR NOTICE ===== -->
+  @if (submitted && form.invalid) {
+    <div class="error-card">
+      <mat-icon>error_outline</mat-icon>
+      <p>Please fix the errors above before submitting.</p>
+    </div>
+  }
+
+  <div class="footer">© 2025 NexusGG Esports · All rights reserved</div>
+</div>
